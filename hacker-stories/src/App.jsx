@@ -61,17 +61,4 @@ const List = ({ list }) => (
 	</ul>
 );
 
-List.propTypes = {
-	list: PropTypes.arrayOf(
-		PropTypes.shape({
-			objectID: PropTypes.number.isRequired,
-			url: PropTypes.string.isRequired,
-			title: PropTypes.string.isRequired,
-			author: PropTypes.string.isRequired,
-			num_comments: PropTypes.number.isRequired,
-			points: PropTypes.number.isRequired,
-		})
-	).isRequired,
-};
-
 export default App;
