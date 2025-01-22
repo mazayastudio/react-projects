@@ -51,6 +51,11 @@ function App() {
 	const style = { color: 'red', fontSize: '48px', textTransform: 'uppercase' };
 	const pizzas = pizzaData;
 	const numPizzas = pizzas.length;
+	const hour = new Date().getHours();
+	const openHour = 12;
+	const closeHour = 22;
+	const isOpen = hour >= openHour && hour < closeHour;
+
 	return (
 		<div className='container'>
 			<header className='header'>
@@ -84,6 +89,23 @@ function App() {
 					<p>We're still working on our menu. Please come back later 🙂</p>
 				)}
 			</main>
+
+			<footer className='footer'>
+				{isOpen ? (
+					<>
+						<div className='order'>
+							<p>
+								We're open from {openHour}:00 to {closeHour}:00. Come visit us or order online.
+							</p>
+						</div>
+						<button className='btn'>Order</button>
+					</>
+				) : (
+					<p>
+						We're happy to welcome you between {openHour}:00 and {closeHour}:00
+					</p>
+				)}
+			</footer>
 		</div>
 	);
 }
