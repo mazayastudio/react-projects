@@ -48,9 +48,14 @@ const pizzaData = [
 ];
 
 function App() {
+	const style = { color: 'red', fontSize: '48px', textTransform: 'uppercase' };
 	return (
-		<div className="container"></div>
-	)
+		<div className='container'>
+			<header className='header'>
+				<h1 style={style}>Fast React Pizza Co.</h1>
+			</header>
+		</div>
+	);
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
