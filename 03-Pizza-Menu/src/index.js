@@ -48,64 +48,92 @@ const pizzaData = [
 ];
 
 function App() {
+	return (
+		<div className='container'>
+			<Header />
+			<Menu />
+			<Footer />
+		</div>
+	);
+}
+
+function Header() {
 	const style = { color: 'red', fontSize: '48px', textTransform: 'uppercase' };
+
+	return (
+		<header className='header'>
+			<h1 style={style}>Fast React Pizza Co.</h1>
+		</header>
+	);
+}
+
+function Menu() {
 	const pizzas = pizzaData;
 	const numPizzas = pizzas.length;
+
+	return (
+		<main className='menu'>
+			<h2>Our menu</h2>
+
+			{numPizzas > 0 ? (
+				<>
+					<p>
+						Authentic Italian cuisine. 6 creative dishes to choose from. All from our stone oven, all organic, all
+						delicious.
+					</p>
+
+					<ul className='pizzas'>
+						{pizzas.map((pizza) => (
+							<Pizza pizza={pizza} key={pizza.name} />
+						))}
+					</ul>
+				</>
+			) : (
+				<p>We're still working on our menu. Please come back later 🙂</p>
+			)}
+		</main>
+	);
+}
+
+function Pizza({ pizza }) {
+	return (
+		<li>
+			<img src={pizza.photoName} alt={pizza.name} />
+			<div>
+				<h3>{pizza.name}</h3>
+				<p>{pizza.ingredients}</p>
+				<span>{pizza.soldOut ? 'SOLD OUT' : pizza.price}</span>
+			</div>
+		</li>
+	);
+}
+
+function Footer() {
 	const hour = new Date().getHours();
 	const openHour = 12;
 	const closeHour = 22;
 	const isOpen = hour >= openHour && hour < closeHour;
 
 	return (
-		<div className='container'>
-			<header className='header'>
-				<h1 style={style}>Fast React Pizza Co.</h1>
-			</header>
+		<footer className='footer'>
+			{isOpen ? (
+				<Order openHour={openHour} closeHour={closeHour} />
+			) : (
+				<p>
+					We're happy to welcome you between {openHour}:00 and {closeHour}:00
+				</p>
+			)}
+		</footer>
+	);
+}
 
-			<main className='menu'>
-				<h2>Our menu</h2>
-
-				{numPizzas > 0 ? (
-					<>
-						<p>
-							Authentic Italian cuisine. 6 creative dishes to choose from. All from our stone oven, all organic, all
-							delicious
-						</p>
-						.
-						<ul className='pizzas'>
-							{pizzas.map((pizza) => (
-								<li>
-									<img src={pizza.photoName} alt={pizza.name} />
-									<div>
-										<h3>{pizza.name}</h3>
-										<p>{pizza.ingredients}</p>
-										<span>{pizza.soldOut ? 'SOLD OUT' : pizza.price}</span>
-									</div>
-								</li>
-							))}
-						</ul>
-					</>
-				) : (
-					<p>We're still working on our menu. Please come back later 🙂</p>
-				)}
-			</main>
-
-			<footer className='footer'>
-				{isOpen ? (
-					<>
-						<div className='order'>
-							<p>
-								We're open from {openHour}:00 to {closeHour}:00. Come visit us or order online.
-							</p>
-						</div>
-						<button className='btn'>Order</button>
-					</>
-				) : (
-					<p>
-						We're happy to welcome you between {openHour}:00 and {closeHour}:00
-					</p>
-				)}
-			</footer>
+function Order({ openHour, closeHour }) {
+	return (
+		<div className='order'>
+			<p>
+				We're open from {openHour}:00 to {closeHour}:00. Come visit us or order online.
+			</p>
+			<button className='btn'>Order</button>
 		</div>
 	);
 }
