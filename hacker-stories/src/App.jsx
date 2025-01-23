@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const useStorageState = (key, initialState) => {
   const [value, setValue] = useState(localStorage.getItem(key) ?? initialState);
@@ -12,7 +11,7 @@ const useStorageState = (key, initialState) => {
 };
 
 const App = () => {
-  const stories = [
+  const initialStories = [
     {
       title       : 'React',
       url         : 'https://reactjs.org/',
@@ -32,7 +31,8 @@ const App = () => {
   ];
 
   // const [searchTerm, setSearchTerm] = useState(localStorage.getItem('search') || 'React');
-  const [searchTerm, setSearchTerm] = useStorageState('search', 'React');
+  const [searchTerm, setSearchTerm] = useStorageState('search', '');
+  const [stories, setStories] = useState(initialStories);
 
   // useEffect(() => {
   // 	localStorage.setItem('search', searchTerm);
@@ -42,6 +42,10 @@ const App = () => {
     setSearchTerm(event.target.value);
   };
   const handleChange = stories.filter((story) => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  const handleRemoveStory = item => {
+    const newStories = stories.filter(story => story.objectID !== item.objectID);
+    setStories(newStories);
+  };
 
   return (
     <div>
@@ -60,7 +64,10 @@ const App = () => {
 
       <hr />
 
-      <List list={handleChange} />
+      <List
+        list={handleChange}
+        onRemoveStory={handleRemoveStory}
+      />
     </div>
   );
 };
@@ -87,23 +94,42 @@ const InputWithLabel = ({ id, type, value, onInputChange, children }) => (
 // 	);
 // };
 
-const List = ({ list }) => (
+const List = ({ list, onRemoveStory }) => (
   <ul>
     {list.map(({ objectID, ...item }) => (
-      <Item key={objectID} {...item} />
+      <Item
+        key={objectID} {...item}
+        onRemoveStory={onRemoveStory}
+      />
     ))}
   </ul>
 );
 
-const Item = ({ title, url, author, num_comments, points }) => (
-  <li>
+const Item = ({ title, url, author, num_comments, points, onRemoveStory }) => {
+  const handleRemoveStory = () => onRemoveStory({
+    title,
+    url,
+    author,
+    num_comments,
+    points,
+  });
+
+  return (
+    <li>
     <span>
       <a href={url}>{title}</a>
     </span>
-    <span>{author}</span>
-    <span>{num_comments}</span>
-    <span>{points}</span>
-  </li>
-);
+      <span>{author}</span>
+      <span>{num_comments}</span>
+      <span>{points}</span>
+      <span>
+        <button
+          type="button"
+          onClick={handleRemoveStory}
+        >Dismiss</button>
+      </span>
+    </li>
+  );
+};
 
 export default App;
