@@ -1,0 +1,9 @@
+{
+  "printWidth": 80,
+  "jsxBracketSameLine": false,
+  "jsxSingleQuote": true,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "arrowParens": "always",
+  "proseWrap": "always"
+}
