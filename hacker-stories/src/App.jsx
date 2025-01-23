@@ -1,6 +1,16 @@
 import { useEffect } from 'react';
 import { useState } from 'react';
 
+const useStorageState = (key, initialState) => {
+	const [value, setValue] = useState(localStorage.getItem(key) || initialState);
+
+	useEffect(() => {
+		localStorage.setItem(key, value);
+	}, [value, key]);
+
+	return [value, setValue];
+};
+
 const App = () => {
 	const stories = [
 		{
@@ -21,23 +31,25 @@ const App = () => {
 		},
 	];
 
-	const [searchTerm, setSearchTerm] = useState(localStorage.getItem('search') || 'React');
+	// const [searchTerm, setSearchTerm] = useState(localStorage.getItem('search') || 'React');
+	const [searchTerm, setSearchTerm] = useStorageState('search', 'React');
 
-	useEffect(() => {
-		localStorage.setItem('search', searchTerm);
-	}, [searchTerm]);
+	// useEffect(() => {
+	// 	localStorage.setItem('search', searchTerm);
+	// }, [searchTerm]);
 
 	const handleSearch = (event) => {
 		setSearchTerm(event.target.value);
 	};
 	const handleChange = stories.filter((story) => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
-
 	return (
 		<div>
 			<h1>My Hacker Stories</h1>
 
-			<Search searchTerm={searchTerm} onSearch={handleSearch} />
+			<InputWithLabel id={'search'} label={'Search: '} value={searchTerm} onInputChange={handleSearch} />
+
+			{/* <Search searchTerm={searchTerm} onSearch={handleSearch} /> */}
 
 			<hr />
 
@@ -46,15 +58,22 @@ const App = () => {
 	);
 };
 
-const Search = ({ searchTerm, onSearch }) => {
-	return (
-		<div>
-			<label htmlFor='search'>Search:</label>
-			<input type='text' id='search' onChange={onSearch} value={searchTerm} />
-			<p>Searching for: {searchTerm}</p>
-		</div>
-	);
-};
+const InputWithLabel = ({ id, label, value, onInputChange }) => (
+	<>
+		<label htmlFor={id}>{label}</label>
+		<input id={id} type='text' value={value} onChange={onInputChange} />
+	</>
+);
+
+// const Search = ({ searchTerm, onSearch }) => {
+// 	return (
+// 		<>
+// 			<label htmlFor='search'>Search:</label>
+// 			<input type='text' id='search' onChange={onSearch} value={searchTerm} />
+// 			<p>Searching for: {searchTerm}</p>
+// 		</>
+// 	);
+// };
 
 const List = ({ list }) => (
 	<ul>
