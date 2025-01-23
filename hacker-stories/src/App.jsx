@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
+// Reusable hook for managing local storage state
 const useStorageState = (key, initialState) => {
   const [value, setValue] = useState(localStorage.getItem(key) ?? initialState);
 
@@ -30,50 +31,59 @@ const App = () => {
     },
   ];
 
-  // const [searchTerm, setSearchTerm] = useState(localStorage.getItem('search') || 'React');
+  // State management
   const [searchTerm, setSearchTerm] = useStorageState('search', '');
   const [stories, setStories] = useState(initialStories);
 
-  // useEffect(() => {
-  // 	localStorage.setItem('search', searchTerm);
-  // }, [searchTerm]);
-
-  const handleSearch = (event) => {
+  // Event handler for input change
+  const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
-  const handleChange = stories.filter((story) => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
-  const handleRemoveStory = item => {
-    const newStories = stories.filter(story => story.objectID !== item.objectID);
-    setStories(newStories);
+
+  // Derived state (memoized for performance)
+  const filteredStories = useMemo(
+    () =>
+      stories.filter((story) =>
+        story.title.toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
+    [searchTerm, stories],
+  );
+
+  // Remove story by objectID
+  const removeStory = (objectID) => {
+    setStories((prevStories) =>
+      prevStories.filter((story) => story.objectID !== objectID),
+    );
   };
 
   return (
     <div>
       <h1>My Hacker Stories</h1>
 
+      {/* InputWithLabel component for search */}
       <InputWithLabel
         id="search"
         type="text"
         value={searchTerm}
-        onInputChange={handleSearch}
+        onInputChange={handleSearchChange}
       >
         <strong>Search: </strong>
       </InputWithLabel>
 
-      {/* <Search searchTerm={searchTerm} onSearch={handleSearch} /> */}
-
       <hr />
 
+      {/* List component for rendering stories */}
       <List
-        list={handleChange}
-        onRemoveStory={handleRemoveStory}
+        list={filteredStories}
+        onRemoveStory={removeStory}
       />
     </div>
   );
 };
 
+// Extracted reusable labeled input component
 const InputWithLabel = ({ id, type, value, onInputChange, children }) => (
-  <>
+  <div>
     <label htmlFor={id}>{children}</label>
     <input
       id={id}
@@ -81,55 +91,40 @@ const InputWithLabel = ({ id, type, value, onInputChange, children }) => (
       value={value}
       onChange={onInputChange}
     />
-  </>
+  </div>
 );
 
-// const Search = ({ searchTerm, onSearch }) => {
-// 	return (
-// 		<>
-// 			<label htmlFor='search'>Search:</label>
-// 			<input type='text' id='search' onChange={onSearch} value={searchTerm} />
-// 			<p>Searching for: {searchTerm}</p>
-// 		</>
-// 	);
-// };
-
+// List component for rendering list of items
 const List = ({ list, onRemoveStory }) => (
   <ul>
     {list.map(({ objectID, ...item }) => (
       <Item
-        key={objectID} {...item}
+        key={objectID}
+        objectID={objectID} {...item}
         onRemoveStory={onRemoveStory}
       />
     ))}
   </ul>
 );
 
-const Item = ({ title, url, author, num_comments, points, onRemoveStory }) => {
-  const handleRemoveStory = () => onRemoveStory({
-    title,
-    url,
-    author,
-    num_comments,
-    points,
-  });
-
-  return (
-    <li>
+// List item component for rendering each story
+const Item = ({ objectID, title, url, author, num_comments, points, onRemoveStory }) => (
+  <li>
     <span>
       <a href={url}>{title}</a>
     </span>
-      <span>{author}</span>
-      <span>{num_comments}</span>
-      <span>{points}</span>
-      <span>
-        <button
-          type="button"
-          onClick={handleRemoveStory}
-        >Dismiss</button>
-      </span>
-    </li>
-  );
-};
+    <span>{author}</span>
+    <span>{num_comments}</span>
+    <span>{points}</span>
+    <span>
+      <button
+        type="button"
+        onClick={() => onRemoveStory(objectID)}
+      >
+        Dismiss
+      </button>
+    </span>
+  </li>
+);
 
 export default App;
