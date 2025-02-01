@@ -45,7 +45,11 @@ const App = () => {
   };
 
   const handleSplitBill = (value) => {
-    setFriends(friends => friends.map(friend => friend.id === selectedFriend.id ? { ...friend, balance: friend.balance + value } : friend));
+    setFriends(friends => friends.map(friend => friend.id === selectedFriend.id
+                                                ? { ...friend, balance: friend.balance + value }
+                                                : friend));
+    setSelectedFriend(null);
+    setShowAddFriend(false);
   };
 
   return (
@@ -78,12 +82,12 @@ const FriendsList = ({ friends, onSelection, selectedFriend }) => {
   return (
     <ul>
       {friends.map(friend =>
-        <Friend
-          key={friend.id}
-          friend={friend}
-          onSelection={onSelection}
-          selected={selectedFriend}
-        />)}
+                     <Friend
+                       key={friend.id}
+                       friend={friend}
+                       onSelection={onSelection}
+                       selected={selectedFriend}
+                     />)}
     </ul>
   );
 };
@@ -111,7 +115,9 @@ const Friend = ({ friend, onSelection, selected }) => {
       )}
       {friend.balance === 0 && <p>You and {friend.name} are even.</p>}
 
-      <Button onClick={() => onSelection(friend)}>{isSelected ? 'CLOSE' : 'SELECT'}</Button>
+      <Button onClick={() => onSelection(friend)}>{isSelected
+                                                   ? 'CLOSE'
+                                                   : 'SELECT'}</Button>
     </li>
   );
 };
