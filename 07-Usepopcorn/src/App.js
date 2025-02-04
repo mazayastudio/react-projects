@@ -40,34 +40,35 @@ export default function App() {
       setError('');
       return;
     }
+
+    const controller = new AbortController();
     const fetchMovies = async () => {
       try {
         setIsLoading(true);
         const res = await fetch(
           `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+          { signal: controller.signal },
         );
 
         if (!res.ok) throw new Error('Failed to fetch movies');
 
         const data = await res.json();
-        setMovies(data.Search);
         if (data.Response === 'False') throw new Error('No movies found');
+        setMovies(data.Search);
+        setError('');
       }
       catch (err) {
         console.error(err);
-        setError(err.message);
+
+        if (err.name !== 'AbortError')
+          setError(err.message);
       }
       finally {
         setIsLoading(false);
       }
     };
-    const controller = fetchMovies();
-
-    // Cleanup function to abort fetch if debouncedQuery changes or component
-    // unmounts
-    return () => {
-      controller.then(c => c.abort());
-    };
+    fetchMovies();
+    return () => controller.abort();
   }, [debouncedQuery, query]);
 
   return (
