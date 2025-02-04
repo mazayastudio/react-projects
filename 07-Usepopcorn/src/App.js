@@ -9,10 +9,15 @@ export default function App() {
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [query, setQuery] = useState('interstellar');
+  const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState(query);
+  const [selectedId, setSelectedId] = useState(null);
 
   const onChangeQuery = (e) => setQuery(e.target.value);
+  const onSelectMovie = (id) => {
+    setSelectedId(selectedId === id ? null : id);
+  };
+  const handleCloseMovie = () => setSelectedId(null);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -65,13 +70,25 @@ export default function App() {
         <Box>
           {isLoading && <Loader />}
           {!isLoading && !error && movies.length > 0 &&
-            <MovieList movies={movies} />}
+            <MovieList
+              movies={movies}
+              onSelectMovie={onSelectMovie}
+            />}
           {error && <ErrorMessage message={error} />}
         </Box>
 
         <Box>
-          <WatchedSummary watched={watched} />
-          <WatchedMoviesList watched={watched} />
+          {
+            selectedId
+              ? <MovieDetails
+                selectedId={selectedId}
+                onCloseMovie={handleCloseMovie}
+              />
+              : <>
+                <WatchedSummary watched={watched} />
+                <WatchedMoviesList watched={watched} />
+              </>
+          }
         </Box>
       </Main>
     </>
@@ -148,19 +165,20 @@ const Box = ({ children }) => {
     </div>
   );
 };
-const MovieList = ({ movies }) => {
+const MovieList = ({ movies, onSelectMovie }) => {
   return (
-    <ul className="list">
+    <ul className="list list-movies">
       {movies?.map((movie) => <Movie
         key={movie.imdbID}
         movie={movie}
+        onSelectMovie={onSelectMovie}
       />)}
     </ul>
   );
 };
-const Movie = ({ movie }) => {
+const Movie = ({ movie, onSelectMovie }) => {
   return (
-    <li>
+    <li onClick={() => onSelectMovie(movie.imdbID)}>
       <img
         src={movie.Poster}
         alt={`${movie.Title} poster`}
@@ -198,6 +216,21 @@ const Movie = ({ movie }) => {
     </div>
   );
 };*/
+const MovieDetails = ({ selectedId, onCloseMovie }) => {
+  return (
+    <div
+      className="selected-movie"
+    >
+      <button
+        className="btn-back"
+        onClick={onCloseMovie}
+      >
+        &larr;
+      </button>
+      {selectedId}
+    </div>
+  );
+};
 const WatchedSummary = ({ watched }) => {
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
   const avgUserRating = average(watched.map((movie) => movie.userRating));
