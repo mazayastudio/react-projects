@@ -62,7 +62,7 @@ export default function App() {
       }
     };
     fetchMovies();
-  }, [debouncedQuery]);
+  }, [debouncedQuery, query]);
 
   return (
     <>
@@ -278,6 +278,13 @@ const MovieDetails = ({ selectedId, onCloseMovie, onAddWatched, watched }) => {
     };
     getMovieDetails();
   }, [selectedId]);
+
+
+  useEffect(() => {
+    if (!title) return;
+    document.title = `usePopcorn | ${title}`;
+    return () => document.title = 'usePopcorn';
+  }, [title]);
 
   return (
     <div className="details">
