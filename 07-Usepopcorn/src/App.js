@@ -8,39 +8,65 @@ export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const query = 'interstellar';
+  const [error, setError] = useState('');
+  const [query, setQuery] = useState('interstellar');
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+  const onChangeQuery = (e) => setQuery(e.target.value);
 
   useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(query.trim());
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [query]);
+
+  useEffect(() => {
+    if (!debouncedQuery) {
+      setMovies([]);
+      setError('');
+      return;
+    }
     const fetchMovies = async () => {
       try {
         setIsLoading(true);
         const res = await fetch(
           `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
         );
+
+        if (!res.ok) throw new Error('Failed to fetch movies');
+
         const data = await res.json();
         setMovies(data.Search);
-        setIsLoading(false);
+        if (data.Response === 'False') throw new Error('No movies found');
       }
       catch (err) {
-        console.error('Failed to fetch movies', err);
+        console.error(err);
+        setError(err.message);
       }
       finally {
         setIsLoading(false);
       }
     };
     fetchMovies();
-  }, []);
+  }, [debouncedQuery]);
 
   return (
     <>
       <NavBar>
-        <Search />
+        <Search
+          query={query}
+          onChangeQuery={onChangeQuery}
+        />
         <NumResults movies={movies} />
       </NavBar>
 
       <Main>
         <Box>
-          {isLoading ? <Loader /> : <MovieList movies={movies} />}
+          {isLoading && <Loader />}
+          {!isLoading && !error && movies.length > 0 &&
+            <MovieList movies={movies} />}
+          {error && <ErrorMessage message={error} />}
         </Box>
 
         <Box>
@@ -58,9 +84,9 @@ const Loader = () => {
   );
 };
 
-const ErrorMessage = ({ error }) => {
+const ErrorMessage = ({ message }) => {
   return (
-    <p className="error">{error}</p>
+    <p className="error"><span>⛔</span> {message}</p>
   );
 };
 const NavBar = ({ children }) => {
@@ -79,8 +105,7 @@ const Logo = () => {
     </div>
   );
 };
-const Search = () => {
-  const [query, setQuery] = useState('');
+const Search = ({ query, onChangeQuery }) => {
 
   return (
     <input
@@ -88,7 +113,7 @@ const Search = () => {
       type="text"
       placeholder="Search movies..."
       value={query}
-      onChange={(e) => setQuery(e.target.value)}
+      onChange={onChangeQuery}
     />
   );
 };
