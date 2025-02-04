@@ -61,7 +61,13 @@ export default function App() {
         setIsLoading(false);
       }
     };
-    fetchMovies();
+    const controller = fetchMovies();
+
+    // Cleanup function to abort fetch if debouncedQuery changes or component
+    // unmounts
+    return () => {
+      controller.then(c => c.abort());
+    };
   }, [debouncedQuery, query]);
 
   return (
@@ -283,7 +289,9 @@ const MovieDetails = ({ selectedId, onCloseMovie, onAddWatched, watched }) => {
   useEffect(() => {
     if (!title) return;
     document.title = `usePopcorn | ${title}`;
-    return () => document.title = 'usePopcorn';
+    return () => {
+      document.title = 'usePopcorn';
+    };
   }, [title]);
 
   return (
