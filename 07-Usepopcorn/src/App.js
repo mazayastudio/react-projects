@@ -274,6 +274,13 @@ const MovieDetails = ({ selectedId, onCloseMovie, onAddWatched, watched }) => {
         } = movie;
 
   useEffect(() => {
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') onCloseMovie();
+    });
+    return () => document.removeEventListener('keydown', onCloseMovie);
+  }, [onCloseMovie]);
+
+  useEffect(() => {
     const getMovieDetails = async () => {
       setIsLoading(true);
       const res = await fetch(
