@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import StarRating from './StarRating';
 import { useMovies } from './useMovies';
+import { useLocalStorageState } from './useLocalStorageState';
+import { useKey } from './useKey';
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -8,10 +10,7 @@ const average = (arr) =>
 const KEY = 'f1cc5dd0';
 
 export default function App() {
-  const [watched, setWatched] = useState(() => {
-    const storedValue = localStorage.getItem('watched');
-    return storedValue ? JSON.parse(storedValue) : [];
-  });
+  const [watched, setWatched] = useLocalStorageState([], 'watched');
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState(null);
 
@@ -31,10 +30,6 @@ export default function App() {
     setWatched(
       watched => watched.filter(movie => movie.imdbID !== id));
   };
-
-  useEffect(() => {
-    localStorage.setItem('watched', JSON.stringify(watched));
-  }, [watched]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -121,17 +116,11 @@ const Logo = () => {
 const Search = ({ query, onChangeQuery, setQuery }) => {
   const inputEl = useRef(null);
 
-  useEffect(() => {
-    const callback = e => {
-      if (document.activeElement !== inputEl.current) return;
-      if (e.code === 'Enter') {
-        inputEl.current.focus();
-        setQuery('');
-      }
-
-    };
-    document.addEventListener('keydown', callback);
-  }, [setQuery]);
+  useKey('Enter', function() {
+    if (document.activeElement !== inputEl.current) return;
+    inputEl.current.focus();
+    setQuery('');
+  });
 
   return (
     <input
@@ -247,12 +236,7 @@ const MovieDetails = ({ selectedId, onCloseMovie, onAddWatched, watched }) => {
           Genre   : genre,
         } = movie;
 
-  useEffect(() => {
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') onCloseMovie();
-    });
-    return () => document.removeEventListener('keydown', onCloseMovie);
-  }, [onCloseMovie]);
+  useKey('Escape', onCloseMovie);
 
   useEffect(() => {
     const getMovieDetails = async () => {
