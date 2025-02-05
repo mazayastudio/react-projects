@@ -1,20 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import StarRating from './StarRating';
+import { useMovies } from './useMovies';
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 const KEY = 'f1cc5dd0';
+
 export default function App() {
-  const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState(() => {
     const storedValue = localStorage.getItem('watched');
     return storedValue ? JSON.parse(storedValue) : [];
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const [query, setQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState(query);
   const [selectedId, setSelectedId] = useState(null);
 
   const onChangeQuery = (e) => setQuery(e.target.value);
@@ -40,47 +38,12 @@ export default function App() {
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedQuery(query.trim());
+      setQuery(query.trim());
     }, 500);
     return () => clearTimeout(handler);
   }, [query]);
 
-  useEffect(() => {
-    if (!debouncedQuery) {
-      setMovies([]);
-      setError('');
-      return;
-    }
-
-    const controller = new AbortController();
-    const fetchMovies = async () => {
-      try {
-        setIsLoading(true);
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
-          { signal: controller.signal },
-        );
-
-        if (!res.ok) throw new Error('Failed to fetch movies');
-
-        const data = await res.json();
-        if (data.Response === 'False') throw new Error('No movies found');
-        setMovies(data.Search);
-        setError('');
-      }
-      catch (err) {
-        console.error(err);
-
-        if (err.name !== 'AbortError')
-          setError(err.message);
-      }
-      finally {
-        setIsLoading(false);
-      }
-    };
-    fetchMovies();
-    return () => controller.abort();
-  }, [debouncedQuery, query]);
+  const { movies, isLoading, error } = useMovies(query, handleCloseMovie);
 
   return (
     <>
